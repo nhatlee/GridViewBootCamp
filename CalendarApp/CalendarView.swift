@@ -39,15 +39,29 @@ final class CalendarViewModel: ObservableObject {
             ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
             ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
             ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
+            ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"],
+            ["4 Mi Easy", "4 Mi Easy", "4 Mi Easy", "5 Mi Easy", "4 Mi Easy", "8 Mi Easy", "Rest"],
+            ["5 Mi Easy", "6 Mi Hills", "5 Mi Easy", "5 Mi Medium", "4 Mi Easy", "9 Mi Easy", "Rest"],
+            ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
+            ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
+            ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
+            ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"],
+            ["4 Mi Easy", "4 Mi Easy", "4 Mi Easy", "5 Mi Easy", "4 Mi Easy", "8 Mi Easy", "Rest"],
+            ["5 Mi Easy", "6 Mi Hills", "5 Mi Easy", "5 Mi Medium", "4 Mi Easy", "9 Mi Easy", "Rest"],
+            ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
+            ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
+            ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
             ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"]
         ]
         return plan[week][day]
     }
     
     func getWeekTotal(for week: Int) -> String {
-        let totals = ["31", "34", "36", "30.1", "37", "24.1"]
+        let totals = ["31", "34", "36", "30.1", "37", "24.1", "31", "34", "36", "30.1", "37", "24.1", "31", "34", "36", "30.1"]
         return totals[week]
     }
+    
+    @Published var numbersOfWeeks: Int = 16
 }
 
 struct CalendarView: View {
@@ -81,7 +95,7 @@ struct CalendarView: View {
                 }
                 
                 // Week Rows
-                ForEach(0..<6) { week in
+                ForEach(0..<viewModel.numbersOfWeeks) { week in
                     // WEEK cell
                     Text("\(week + 1)")
                         .font(.body)
