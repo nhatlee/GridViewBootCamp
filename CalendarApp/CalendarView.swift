@@ -117,7 +117,7 @@ struct CalendarView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .frame(height: 90)
                         .padding(6)
-                        .background(Color.white)
+                        .background(Color.gray.opacity(0.3))
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.3)))
                     }
                     
