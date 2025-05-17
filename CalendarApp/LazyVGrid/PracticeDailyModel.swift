@@ -12,7 +12,6 @@ struct PracticeModel: Hashable {
     let days: [PracticeDailyModel]
     let result: DailyPracticeResult
     
-    
     static let mocked: [PracticeModel] = (1...20).map {
         let daily = PracticeDailyModel.mocked(week: $0)
         return PracticeModel(
@@ -86,7 +85,6 @@ struct PracticeDailyModel: Hashable {
             let totalDaysInWeek = 7
             let plusDayNextWeek = (week - 1)*totalDaysInWeek
             let dayString = "Day \($0 + plusDayNextWeek)"
-//            print(dayString)
             return PracticeDailyModel(
                 id: dayString,
                 day: dayString,
