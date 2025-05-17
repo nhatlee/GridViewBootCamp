@@ -6,67 +6,33 @@
 //
 
 import SwiftUI
-enum Weekday: String, CaseIterable {
-    case mon, tue, wed, thu, fri, sat, sun
-    
-    var value: String {
-        self.rawValue.uppercased()
-    }
-}
+import Combine
 
 struct HeaderRowConfig: Hashable {
+    let id = UUID()
     let title: String
     let color: Color
 }
 
 final class CalendarViewModel: ObservableObject {
+    var practices: [PracticeModel] = PracticeModel.mocked
+    
     func buildHeaderString() -> [HeaderRowConfig] {
         let weekTitle = HeaderRowConfig(title: "WEEK", color: .black)
         var header = [weekTitle]
         let allWeekday = Weekday.allCases.map {
-            HeaderRowConfig(title: $0.value, color: .blue)
+            HeaderRowConfig(title: $0.name, color: .blue)
         }
         let totals = HeaderRowConfig(title: "TOTALS", color: .orange)
         header.append(contentsOf: allWeekday)
         header.append(totals)
         return header
     }
-    
-    func getRunPlan(for week: Int, day: Int) -> String {
-        let plan = [
-            ["4 Mi Easy", "4 Mi Easy", "4 Mi Easy", "5 Mi Easy", "4 Mi Easy", "8 Mi Easy", "Rest"],
-            ["5 Mi Easy", "6 Mi Hills", "5 Mi Easy", "5 Mi Medium", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
-            ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
-            ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"],
-            ["4 Mi Easy", "4 Mi Easy", "4 Mi Easy", "5 Mi Easy", "4 Mi Easy", "8 Mi Easy", "Rest"],
-            ["5 Mi Easy", "6 Mi Hills", "5 Mi Easy", "5 Mi Medium", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
-            ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
-            ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"],
-            ["4 Mi Easy", "4 Mi Easy", "4 Mi Easy", "5 Mi Easy", "4 Mi Easy", "8 Mi Easy", "Rest"],
-            ["5 Mi Easy", "6 Mi Hills", "5 Mi Easy", "5 Mi Medium", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Hills", "5 Mi Easy", "6 Mi Intervals", "4 Mi Easy", "9 Mi Easy", "Rest"],
-            ["6 Mi Easy", "6 Mi Medium", "5 Mi Easy", "6 Mi Easy", "4 Mi Easy", "3.1 Mi Fast", "Rest"],
-            ["6 Mi Easy", "6 Miles Hills", "5 Mi Easy", "6 Mi Intervals", "6 Mi Easy", "10 Mi Easy", "Rest"],
-            ["6 Mi Easy", "5 Mi Fast", "5 Mi Easy", "6 Mi Easy", "30 Min XT", "3.1 Race Day!", "Rest"]
-        ]
-        return plan[week][day]
-    }
-    
-    func getWeekTotal(for week: Int) -> String {
-        let totals = ["31", "34", "36", "30.1", "37", "24.1", "31", "34", "36", "30.1", "37", "24.1", "31", "34", "36", "30.1"]
-        return totals[week]
-    }
-    
-    @Published var numbersOfWeeks: Int = 16
 }
 
 struct CalendarView: View {
     let columns = [
-        GridItem(.fixed(70)),  // WEEK
+        GridItem(.fixed(68)),  // WEEK
         GridItem(.flexible()), // MON
         GridItem(.flexible()), // TUE
         GridItem(.flexible()), // WED
@@ -78,57 +44,92 @@ struct CalendarView: View {
     ]
     
     @StateObject private var viewModel = CalendarViewModel()
+    @State private var practicesModel = PracticeModel.mocked
     
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 8) {
                 // Header Row
-                ForEach(viewModel.buildHeaderString(), id: \.self) { config in
-                    Text(config.title)
-                        .font(.system(size: 12, weight: .bold))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding()
-                        .background(
-                            config.color
-                        )
-                        .foregroundColor(.white)
-                }
-                
-                // Week Rows
-                ForEach(0..<viewModel.numbersOfWeeks) { week in
-                    // WEEK cell
-                    Text("\(week + 1)")
-                        .font(.body)
-                        .bold()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.black)
-                        .foregroundColor(.white)
-                    
-                    // Day Cells
-                    ForEach(0..<7) { day in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Day \(week * 7 + day + 1)")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            Text(viewModel.getRunPlan(for: week, day: day))
-                                .font(.subheadline)
-                                .bold()
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .frame(height: 90)
-                        .padding(6)
-                        .background(Color.gray.opacity(0.3))
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.3)))
-                    }
-                    
-                    // Totals Cell
-                    Text(viewModel.getWeekTotal(for: week))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.white)
-                }
+                hederView
+                weekRow
             }
             .padding()
         }
+    }
+    
+    private var hederView: some View {
+        ForEach(viewModel.buildHeaderString(), id: \.self) { config in
+            Text(config.title)
+                .font(.system(size: 12, weight: .bold))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .background(config.color)
+                .foregroundColor(.white)
+        }
+    }
+    
+    private var weekRow: some View {
+        // Week Rows
+        ForEach(practicesModel, id: \.self) { practiveModel in
+            // WEEK cell
+            weekCell(practiveModel.week)
+            // Day Cells
+            dayCell(practiveModel.days)
+            // Totals Cell
+            totalCell(practiveModel.result)
+        }
+    }
+    
+    private func weekCell(_ week: Int) -> some View {
+        Text("\(week)")
+            .font(.body)
+            .bold()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black)
+            .foregroundColor(.white)
+    }
+    
+    private func dayCell(_ days: [PracticeDailyModel]) -> some View {
+        ForEach(days, id: \.id) { day in
+            dayRow(day)
+        }
+    }
+    
+    private func dayRow(_ dayModel: PracticeDailyModel) -> some View {
+        VStack(spacing: 4) {
+            Text(dayModel.day)
+                .font(.headline)
+                .foregroundColor(.green)
+                .frame(maxHeight: 40, alignment: .center)
+            Group {
+                Text("Workout: \(dayModel.workout)")
+                Text("Sleep: \(dayModel.sleep)")
+                Text("Drinks: \(dayModel.drinks)")
+            }
+            .font(.caption)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.gray.opacity(0.3))
+        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.3)))
+    }
+    
+    private func totalCell(_ result: DailyPracticeResult) -> some View {
+        VStack(alignment: .leading) {
+            Text("\(result.totalMin)")
+                .font(.title)
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .center)
+            Group {
+                Text("Actual Min: \(result.actualMin)")
+                Text("AvgSleep: \(result.avgSlep)")
+                Text("Tot Drinks: \(String(format: "%.2f", result.totalDrinks))")
+            }
+            .font(.system(size: 10))
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
